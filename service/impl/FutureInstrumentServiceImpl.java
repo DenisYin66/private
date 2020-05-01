@@ -43,7 +43,15 @@ public class FutureInstrumentServiceImpl
 	private List<Instruments> getInstruments()
 	{
 		List<Instruments> instruments = futuresMarketV3.getInstruments();
-		return instruments;
+
+		List<Instruments> result = new ArrayList<>();
+		for(Instruments instrument : instruments){
+			if(instrument.getUnderlying_index().indexOf("USDT") != -1){
+				continue;
+			}
+			result.add(instrument);
+		}
+		return result;
 	}
 
 	private  String findNextQuarterString(List<Instruments> instruments){
