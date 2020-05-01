@@ -1,0 +1,12 @@
+package com.yin.service;
+
+import com.alibaba.fastjson.JSONObject;
+
+/**
+* @author yin
+* @createDate 2018年12月24日 下午5:19:08
+*/
+public interface TickerService extends InstrumentsTickersService {
+	public void processData(String table, String action, JSONObject data);
+	public boolean validateChecksum(long checksum);
+}
