@@ -139,34 +139,6 @@ public class FutureInstrumentServiceImpl
 				cacheInstruments.put(futureInstrument.getInstrument_id(), futureInstrument);
 				String key = periodKey(futureInstrument.getUnderlying_index(), futureInstrument.getContractType());
 				cachePeriodInstruments.put(key, futureInstrument);
-
-				Ticker ticker = getTicker(futureInstrument.getInstrument_id());
-				String timestamp = ticker.getTimestamp();
-				try {
-					long time = sdf.parse(timestamp).getTime();
-					System.out.println(indexDate.getTime());
-					if (time > indexDate.getTime() - 8 * 60 * 60 * 1000) {
-						if (cacheFiveMinPeriodTickers.get(key) == null) {
-							cacheFiveMinPeriodTickers.put(key, ticker);
-						} else {
-							long cacheTickerTime = sdf.parse(cacheFiveMinPeriodTickers.get(key).getTimestamp()).getTime();
-							//1.判断cache是否过期
-							System.out.println("标准时刻为："+indexDate);
-							System.out.println(cacheTickerTime < indexDate.getTime() - 8 * 60 * 60 * 1000);
-							if(cacheTickerTime < indexDate.getTime() - 8 * 60 * 60 * 1000){
-								cacheFiveMinPeriodTickers.put(key, ticker);
-							}else {
-								//2.判断是否为最接近的Index
-								if(time < cacheTickerTime){
-									cacheFiveMinPeriodTickers.put(key,ticker);
-								}
-							}
-						}
-					}
-				} catch (ParseException e) {
-					System.out.println("日期解析错误");
-				}
-
 			}
 		}
 

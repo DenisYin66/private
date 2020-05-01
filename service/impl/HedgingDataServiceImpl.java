@@ -94,44 +94,48 @@ public class HedgingDataServiceImpl extends BaseDataServiceImpl implements Hedgi
 		float dangzhou = 0f;
 		float dangji = 0f;
 		float dangzhou_index = 0f;
+		float dangji_index = 0f;
+		String dangzhou_index_time = "";
+		String dangji_index_time = "";
 
 		TickerBean tickerBean1 = instrumentsTickersService.getLastPrice(thisInstrumentId);
 		TickerBean tickerBean2 = instrumentsTickersService.getLastPrice(nextInstrumentId);
 		TickerBean thisTickerIndex = instrumentsTickersService.getFiveMinIndexPrice(thisInstrumentId);
 		TickerBean nextTickerIndex = instrumentsTickersService.getFiveMinIndexPrice(nextInstrumentId);
 
-		System.out.println("=========================");
 		if(tickerBean1 != null) {
 			dangzhou = tickerBean1.getFloatLastPrice();
-			System.out.println("当周：" + dangzhou);
 		}
 		if(tickerBean2 != null) {
 			dangji = tickerBean1.getFloatLastPrice();
-			System.out.println("当季：" + dangji);
+		}
+		if(thisTickerIndex != null){
+			dangzhou_index = thisTickerIndex.getFloatIndexPrice();
+			Date a = new Date(thisTickerIndex.getTime());
+			dangzhou_index_time = a.toString();
+		}
+		if(nextTickerIndex != null){
+			dangji_index = nextTickerIndex.getFloatIndexPrice();
+			Date b = new Date(thisTickerIndex.getTime());
+			dangji_index_time = b.toString();
 		}
 		if (tickerBean1 != null && tickerBean2 != null) {
 			// 奥特曼触发指数
-			aoteman_index = (tickerBean2.getFloatLastPrice() - tickerBean1.getFloatLastPrice()) ;
+			aoteman_index = ((dangji - dangji_index) / dangji_index ) / ((dangzhou - dangzhou_index) / dangzhou_index);
 		}
-		if(thisTickerIndex != null){
-			Date a = new Date(thisTickerIndex.getTime());
-			System.out.println("当周5分钟指标a：" + thisTickerIndex.getFloatIndexPrice() + a);
-		}
-		if(nextTickerIndex != null){
-			Date b = new Date(thisTickerIndex.getTime());
-			System.out.println("当季5分钟指标：" + nextTickerIndex.getFloatIndexPrice() + b );
-		}
-		//System.out.println("=========================");
 		Map<String, Object> map = new HashMap<String, Object>();// 装的是%之后的结果
 		map.put("type", type);
 		map.put("time", System.currentTimeMillis()+"");
 		map.put("s_b_v", 0 * 100f);
 		map.put("b_s_v", 0 * 100f);
-		//map.put("dangzhou_index", thisTickerIndex.getLast());
 		map.put("dangzhou", dangzhou);
-		//map.put("dangji_index", nextTickerIndex.getLast());
 		map.put("dangji", dangji);
-		//map.put("a_t_m", aoteman_index * 100f);
+		map.put("dangzhou_index", dangzhou_index);
+		map.put("dangji_index",dangji_index);
+		map.put("dangzhou", dangzhou);
+		map.put("dangzhou_index_time",dangzhou_index_time);
+		map.put("dangji_index_time",dangji_index_time);
+		map.put("a_t_m", aoteman_index );
 		hedgingContext.addHedgingData(map);
 		send(type + "_" + hedgingContext.getCoin(), map);
 	}
