@@ -161,6 +161,7 @@ public class FutureInstrumentServiceImpl
 		}
 
 		List<String> subscribes = getSubscribes();
+		System.out.println(subscribes);
 		client.tryAddChannel("subscribe", subscribes);
 	}
 

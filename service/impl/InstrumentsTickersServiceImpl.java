@@ -28,7 +28,7 @@ public class InstrumentsTickersServiceImpl implements WebSocketService, Instrume
 				String table = root.getString(OkexConstant.TABLE);
 				if (OkexConstant.FUTURES_TICKER.equals(table) || OkexConstant.SPOT_TICKER.equals(table)) {
 					if (root.containsKey(OkexConstant.DATA)) {
-						if(root.getString(OkexConstant.DATA).indexOf("BTC-USD-2006") != -1 ){
+						if(root.getString(OkexConstant.DATA).indexOf("BTC") != -1 ){
 							System.out.println(root);
 						}
 						JSONArray data = root.getJSONArray(OkexConstant.DATA);
