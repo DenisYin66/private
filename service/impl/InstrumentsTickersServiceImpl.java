@@ -33,9 +33,9 @@ public class InstrumentsTickersServiceImpl implements WebSocketService, Instrume
 				if (OkexConstant.FUTURES_TICKER.equals(table) || OkexConstant.SPOT_TICKER.equals(table)) {
 					if (root.containsKey(OkexConstant.DATA)) {
 						//处理实时数据
-						if(root.getString(OkexConstant.DATA).indexOf("BTC") != -1 ){
-							System.out.println(root);
-						}
+						//if(root.getString(OkexConstant.DATA).indexOf("BTC") != -1 ){
+						//	System.out.println(root);
+						//}
 						JSONArray data = root.getJSONArray(OkexConstant.DATA);
 						Iterator it = data.iterator();
 						while (it.hasNext()) {
@@ -60,17 +60,16 @@ public class InstrumentsTickersServiceImpl implements WebSocketService, Instrume
 								String timestamp = instrumentJSON.getString("timestamp");
 								try {
 									long time = sdf.parse(timestamp).getTime();
-									System.out.println(indexDate.getTime());
+									//System.out.println(indexDate.getTime());
 									if (time > indexDate.getTime() - 8 * 60 * 60 * 1000) {
 										if (cacheFiveMinPeriodTickers.get(instrumentId) == null) {
 											putCacheFiveMinPeriodTickers(instrumentId,lastPrice,time);
 										} else {
 											long cacheTickerTime = cacheFiveMinPeriodTickers.get(instrumentId).getTime();
 											//1.判断cache是否过期
-											System.out.println("标准时刻为："+indexDate);
-											System.out.println(cacheTickerTime < indexDate.getTime() - 8 * 60 * 60 * 1000);
+											//System.out.println("标准时刻为："+indexDate);
+											//System.out.println(cacheTickerTime < indexDate.getTime() - 8 * 60 * 60 * 1000);
 											if(cacheTickerTime < indexDate.getTime() - 8 * 60 * 60 * 1000){
-												System.out.println("杨婷");
 												putCacheFiveMinPeriodTickers(instrumentId,lastPrice,time);
 											}else {
 												//2.判断是否为最接近的Index

@@ -87,57 +87,46 @@ public class HedgingDataServiceImpl extends BaseDataServiceImpl implements Hedgi
 
 	public void processData(HedgingContext hedgingContext, String type, String thisInstrumentId,
 			String nextInstrumentId) {
-		float sell_buy_value = 0f;
-		Level2Bean level2Buy = instrumentsDepthService.getBuyFirst(thisInstrumentId);  //通过InstrumentId获取最新成交价，参考websocketApi 公共Ticker频道
-		Level2Bean level2Sell = instrumentsDepthService.getSellFirst(nextInstrumentId);
-
-		if (level2Buy != null && level2Sell != null) {
-			// 开仓策略 近期开空，远期开多  (买1-卖1)/卖1  现货为：websocketApi现货部分中的 公共Ticker频道 last数据（参数为InstrumentId：币对，交易时间）
-			sell_buy_value = (level2Buy.getFloatPrice() - level2Sell.getFloatPrice()) / level2Sell.getFloatPrice();
-		}
-		float buy_sell_value = 0f;
-		level2Buy = instrumentsDepthService.getBuyFirst(nextInstrumentId);
-		level2Sell = instrumentsDepthService.getSellFirst(thisInstrumentId);
-		if (level2Buy != null && level2Sell != null) {
-			// 开仓策略 近期开多，远期开空
-			buy_sell_value = (level2Buy.getFloatPrice() - level2Sell.getFloatPrice()) / level2Sell.getFloatPrice();
-		}
+		//Level2Bean level2Buy = instrumentsDepthService.getBuyFirst(thisInstrumentId);  //通过InstrumentId获取最新成交价，参考websocketApi 公共Ticker频道
+		//Level2Bean level2Sell = instrumentsDepthService.getSellFirst(nextInstrumentId);
 
 		float aoteman_index = 0f;
 		float dangzhou = 0f;
 		float dangji = 0f;
 		float dangzhou_index = 0f;
+
 		TickerBean tickerBean1 = instrumentsTickersService.getLastPrice(thisInstrumentId);
 		TickerBean tickerBean2 = instrumentsTickersService.getLastPrice(nextInstrumentId);
-		//System.out.println("=========================");
+		TickerBean thisTickerIndex = instrumentsTickersService.getFiveMinIndexPrice(thisInstrumentId);
+		TickerBean nextTickerIndex = instrumentsTickersService.getFiveMinIndexPrice(nextInstrumentId);
+
+		System.out.println("=========================");
 		if(tickerBean1 != null) {
 			dangzhou = tickerBean1.getFloatLastPrice();
-			//System.out.println("当周：" + tickerBean1.getFloatLastPrice());
+			System.out.println("当周：" + dangzhou);
 		}
 		if(tickerBean2 != null) {
 			dangji = tickerBean1.getFloatLastPrice();
-			//System.out.println("当季：" + tickerBean2.getFloatLastPrice());
+			System.out.println("当季：" + dangji);
 		}
 		if (tickerBean1 != null && tickerBean2 != null) {
 			// 奥特曼触发指数
 			aoteman_index = (tickerBean2.getFloatLastPrice() - tickerBean1.getFloatLastPrice()) ;
 		}
-
-		TickerBean thisTickerIndex = instrumentsTickersService.getFiveMinIndexPrice(thisInstrumentId);
-		TickerBean nextTickerIndex = instrumentsTickersService.getFiveMinIndexPrice(nextInstrumentId);
 		if(thisTickerIndex != null){
 			Date a = new Date(thisTickerIndex.getTime());
 			System.out.println("当周5分钟指标a：" + thisTickerIndex.getFloatIndexPrice() + a);
 		}
 		if(nextTickerIndex != null){
-			//System.out.println("当季5分钟指标：" + nextTickerIndex.getLast());
+			Date b = new Date(thisTickerIndex.getTime());
+			System.out.println("当季5分钟指标：" + nextTickerIndex.getFloatIndexPrice() + b );
 		}
 		//System.out.println("=========================");
 		Map<String, Object> map = new HashMap<String, Object>();// 装的是%之后的结果
 		map.put("type", type);
 		map.put("time", System.currentTimeMillis()+"");
-		map.put("s_b_v", sell_buy_value * 100f);
-		map.put("b_s_v", buy_sell_value * 100f);
+		map.put("s_b_v", 0 * 100f);
+		map.put("b_s_v", 0 * 100f);
 		//map.put("dangzhou_index", thisTickerIndex.getLast());
 		map.put("dangzhou", dangzhou);
 		//map.put("dangji_index", nextTickerIndex.getLast());
