@@ -1,5 +1,8 @@
 package com.yin.service.impl;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -62,10 +65,7 @@ public class HedgingDataServiceImpl extends BaseDataServiceImpl implements Hedgi
 			FutureInstrument thisInstrument = futureInstrumentService.getFutureInstrument(coin, "this_week");
 			FutureInstrument nextInstrument = futureInstrumentService.getFutureInstrument(coin, "next_week");
 			FutureInstrument quarterInstrument = futureInstrumentService.getFutureInstrument(coin, "quarter");
-			Ticker thisTickerIndex = futureInstrumentService.getInstrumentTicker(coin, "this_week");
-			Ticker nextTickerIndex = futureInstrumentService.getInstrumentTicker(coin, "next_week");
-			Ticker quarterTickerIndex = futureInstrumentService.getInstrumentTicker(coin, "quarter");
-			if(thisInstrument==null || nextInstrument==null || quarterInstrument==null || thisTickerIndex==null || nextTickerIndex==null || quarterTickerIndex==null)
+			if(thisInstrument==null || nextInstrument==null || quarterInstrument==null)
 			{
 				futureInstrumentService.refresh();
 			}
@@ -76,7 +76,7 @@ public class HedgingDataServiceImpl extends BaseDataServiceImpl implements Hedgi
 			//}
 			// 当周与季度
 			if (thisInstrument != null && quarterInstrument != null) {
-				processData(hc, "tq", thisInstrument.getInstrument_id(), quarterInstrument.getInstrument_id(),thisTickerIndex,quarterTickerIndex);
+				processData(hc, "tq", thisInstrument.getInstrument_id(), quarterInstrument.getInstrument_id());
 			}
 			// 次周与季度
 			//if (nextInstrument != null && quarterInstrument != null) {
@@ -86,7 +86,7 @@ public class HedgingDataServiceImpl extends BaseDataServiceImpl implements Hedgi
 	}
 
 	public void processData(HedgingContext hedgingContext, String type, String thisInstrumentId,
-			String nextInstrumentId,Ticker thisTickerIndex,Ticker nextTickerIndex) {
+			String nextInstrumentId) {
 		float sell_buy_value = 0f;
 		Level2Bean level2Buy = instrumentsDepthService.getBuyFirst(thisInstrumentId);  //通过InstrumentId获取最新成交价，参考websocketApi 公共Ticker频道
 		Level2Bean level2Sell = instrumentsDepthService.getSellFirst(nextInstrumentId);
@@ -122,8 +122,12 @@ public class HedgingDataServiceImpl extends BaseDataServiceImpl implements Hedgi
 			// 奥特曼触发指数
 			aoteman_index = (tickerBean2.getFloatLastPrice() - tickerBean1.getFloatLastPrice()) ;
 		}
+
+		TickerBean thisTickerIndex = instrumentsTickersService.getFiveMinIndexPrice(thisInstrumentId);
+		TickerBean nextTickerIndex = instrumentsTickersService.getFiveMinIndexPrice(nextInstrumentId);
 		if(thisTickerIndex != null){
-			//System.out.println("当周5分钟指标a：" + thisTickerIndex.getLast());
+			Date a = new Date(thisTickerIndex.getTime());
+			System.out.println("当周5分钟指标a：" + thisTickerIndex.getFloatIndexPrice() + a);
 		}
 		if(nextTickerIndex != null){
 			//System.out.println("当季5分钟指标：" + nextTickerIndex.getLast());

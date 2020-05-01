@@ -7,6 +7,7 @@ import java.text.ParseException;
 public class TickerBean {
 	private String instrumentId;
 	private BigDecimal  lastPrice;
+	private BigDecimal indexPrice;
 	private String volume;
 	private long time;
 	private String table;
@@ -25,6 +26,13 @@ public class TickerBean {
 	}
 	public void setLastPrice(BigDecimal  price) {
 		this.lastPrice = price;
+	}
+	public void setIndexPricePrice(BigDecimal  price) {
+		this.indexPrice = price;
+	}
+	public float getFloatIndexPrice()
+	{
+		return indexPrice.floatValue();
 	}
 
 	public String getVolume() {
