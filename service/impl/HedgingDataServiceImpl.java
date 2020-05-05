@@ -107,7 +107,7 @@ public class HedgingDataServiceImpl extends BaseDataServiceImpl implements Hedgi
 			dangzhou = tickerBean1.getFloatLastPrice();
 		}
 		if(tickerBean2 != null) {
-			dangji = tickerBean1.getFloatLastPrice();
+			dangji = tickerBean2.getFloatLastPrice();
 		}
 		if(thisTickerIndex != null){
 			dangzhou_index = thisTickerIndex.getFloatIndexPrice();
@@ -116,7 +116,7 @@ public class HedgingDataServiceImpl extends BaseDataServiceImpl implements Hedgi
 		}
 		if(nextTickerIndex != null){
 			dangji_index = nextTickerIndex.getFloatIndexPrice();
-			Date b = new Date(thisTickerIndex.getTime());
+			Date b = new Date(nextTickerIndex.getTime());
 			dangji_index_time = b.toString();
 		}
 		if (tickerBean1 != null && tickerBean2 != null) {
