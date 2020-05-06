@@ -41,16 +41,22 @@ public class HedgingConfig implements Serializable {
 	 * type in (tt,tn,tq,nq)
 	 */
 	private String type;
-	/**
-	 * 近期开空远期开多阈值，当近期买一价减去远期卖一价%超过这个阈值，进行对冲套利
-	 */
-	private float sellBuyThresholdRate = 0.7f;
-	/**
-	 * 近期开多远期开空阈值，当远期买一价减去近期卖一价%超过这个阈值，进行对冲套利
-	 */
-	private float buySellThresholdRate = -0.15f;
 
-	
+	/**
+	 * 溢价入场条件1:当季公式减去当周公式的绝对值差异数，当差异指数超过此阀值就进行套利交易
+	 */
+	private float dangjizhouDiffRate = 0.3f;
+	/**
+	 * 溢价入场条件2:当季公式除以当周公式，当奥特曼指数超过此阀值就进行套利交易
+	 */
+	private float atmInRate = 1.45f;
+
+	/**
+	 * 溢价出场条件1:当季公式除以当周公式，当奥特曼指数低于此阀值就进行平仓套利交易
+	 */
+	private float atmOutRate = 1.1f;
+
+
 	/**
 	 * 开仓滑点%，加大买价和降低卖价，促使交易完全成交
 	 */
@@ -89,8 +95,8 @@ public class HedgingConfig implements Serializable {
 	 */
 	private int maxHedgingHour = 0;
 
-	private int buyLevel = 2;// 使用买几价来匹配，买一价，买二价，买三价，依此类推。
-	private int sellLevel = 2;// 使用卖几价来匹配，卖一价，卖二价，卖三价，依此类推。
+	private int buyLevel = 1;// 使用买几价来匹配，买一价，买二价，买三价，依此类推。
+	private int sellLevel = 1;// 使用卖几价来匹配，卖一价，卖二价，卖三价，依此类推。
 	/**
 	 * 是否开始对冲套利
 	 */
@@ -144,24 +150,32 @@ public class HedgingConfig implements Serializable {
 		this.start = start;
 	}
 
-	public float getSellBuyThresholdRate() {
-		return sellBuyThresholdRate;
-	}
-
-	public void setSellBuyThresholdRate(float sellBuyThresholdRate) {
-		this.sellBuyThresholdRate = sellBuyThresholdRate;
-	}
-
-	public float getBuySellThresholdRate() {
-		return buySellThresholdRate;
-	}
-
-	public void setBuySellThresholdRate(float buySellThresholdRate) {
-		this.buySellThresholdRate = buySellThresholdRate;
-	}
-
 	public float getProfitRate() {
 		return profitRate;
+	}
+
+	public float getDangjizhouDiffRate() {
+		return dangjizhouDiffRate;
+	}
+
+	public void setDangjizhouDiffRate(float dangjizhouDiffRate) {
+		this.dangjizhouDiffRate = dangjizhouDiffRate;
+	}
+
+	public float getAtmInRate() {
+		return atmInRate;
+	}
+
+	public void setAtmInRate(float atmInRate) {
+		this.atmInRate = atmInRate;
+	}
+
+	public float getAtmOutRate() {
+		return atmOutRate;
+	}
+
+	public void setAtmOutRate(float atmOutRate) {
+		this.atmOutRate = atmOutRate;
 	}
 
 	public void setProfitRate(float profitRate) {
