@@ -104,6 +104,7 @@ public class StartHedgingServiceImpl implements WebSocketService {
 				&& !thisInstrument.getInstrumentId().equals(nextInstrument.getInstrumentId())
 				&& thisInstrument.getDeliveryTime() != nextInstrument.getDeliveryTime()) {
 			// 从大到小排列，优先提交高指数的策略
+			/*
 			configs.sort(new Comparator<HedgingConfig>() {
 				@Override
 				public int compare(HedgingConfig o1, HedgingConfig o2) {
@@ -111,6 +112,7 @@ public class StartHedgingServiceImpl implements WebSocketService {
 					return Float.compare(o2.getSellBuyThresholdRate(), o1.getSellBuyThresholdRate());
 				}
 			});
+
 			for (HedgingConfig config : configs) {
 //				手动近卖远买
 				execute(config, thisInstrument, nextInstrument, config.getSellBuyThresholdRate());
@@ -127,6 +129,7 @@ public class StartHedgingServiceImpl implements WebSocketService {
 //				手动近买远卖
 				execute(config, nextInstrument, thisInstrument, config.getBuySellThresholdRate());
 			}
+			*/
 		}
 	}
 
