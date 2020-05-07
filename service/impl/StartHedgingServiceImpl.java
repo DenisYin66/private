@@ -103,7 +103,10 @@ public class StartHedgingServiceImpl implements WebSocketService {
 		if (configs != null && thisInstrument != null && nextInstrument != null
 				&& !thisInstrument.getInstrumentId().equals(nextInstrument.getInstrumentId())
 				&& thisInstrument.getDeliveryTime() != nextInstrument.getDeliveryTime()) {
-			System.out.println("=====尹志诚=====" + configs);
+			for (HedgingConfig config : configs) {
+				System.out.println("=尹志诚=" + config.getCoin() + " " + config.getAtmInRate()
+						+ " " + config.getDangjizhouDiffRate() + " " + config.getTitle());
+			}
 			// 从大到小排列，优先提交高指数的策略
 			/*
 			configs.sort(new Comparator<HedgingConfig>() {
