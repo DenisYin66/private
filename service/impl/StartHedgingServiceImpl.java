@@ -68,24 +68,24 @@ public class StartHedgingServiceImpl implements WebSocketService {
 			switch (instrument.getContractType()) {
 			case "this":
 				// spot,this_week
-				execute(hedgingConfigManager.getConfigs(coin, "tt"), spotInstrument, thisInstrument);
+				//execute(hedgingConfigManager.getConfigs(coin, "tt"), spotInstrument, thisInstrument);
 				break;
 			case "this_week":
 				// spot,this_week
-				execute(hedgingConfigManager.getConfigs(coin, "tt"), spotInstrument, thisInstrument);
+				//execute(hedgingConfigManager.getConfigs(coin, "tt"), spotInstrument, thisInstrument);
 				// this_week,next_week
-				execute(hedgingConfigManager.getConfigs(coin, "tn"), thisInstrument, nextInstrument);
+				//execute(hedgingConfigManager.getConfigs(coin, "tn"), thisInstrument, nextInstrument);
 				// this_week,quarter
 				execute(hedgingConfigManager.getConfigs(coin, "tq"), thisInstrument, quarterInstrument);
 				break;
 			case "next_week":
-				execute(hedgingConfigManager.getConfigs(coin, "tn"), thisInstrument, nextInstrument);
+				//execute(hedgingConfigManager.getConfigs(coin, "tn"), thisInstrument, nextInstrument);
 				// next_week,quarter
-				execute(hedgingConfigManager.getConfigs(coin, "nq"), nextInstrument, quarterInstrument);
+				//execute(hedgingConfigManager.getConfigs(coin, "nq"), nextInstrument, quarterInstrument);
 				break;
 			case "quarter":
 				execute(hedgingConfigManager.getConfigs(coin, "tq"), thisInstrument, quarterInstrument);
-				execute(hedgingConfigManager.getConfigs(coin, "nq"), nextInstrument, quarterInstrument);
+				//execute(hedgingConfigManager.getConfigs(coin, "nq"), nextInstrument, quarterInstrument);
 				break;
 			default:
 				;
@@ -103,6 +103,7 @@ public class StartHedgingServiceImpl implements WebSocketService {
 		if (configs != null && thisInstrument != null && nextInstrument != null
 				&& !thisInstrument.getInstrumentId().equals(nextInstrument.getInstrumentId())
 				&& thisInstrument.getDeliveryTime() != nextInstrument.getDeliveryTime()) {
+			System.out.println("=====尹志诚=====" + configs);
 			// 从大到小排列，优先提交高指数的策略
 			/*
 			configs.sort(new Comparator<HedgingConfig>() {
