@@ -3,6 +3,7 @@ package com.yin.service.impl;
 import java.time.DayOfWeek;
 import java.time.LocalDateTime;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.TimeoutException;
@@ -103,37 +104,27 @@ public class StartHedgingServiceImpl implements WebSocketService {
 		if (configs != null && thisInstrument != null && nextInstrument != null
 				&& !thisInstrument.getInstrumentId().equals(nextInstrument.getInstrumentId())
 				&& thisInstrument.getDeliveryTime() != nextInstrument.getDeliveryTime()) {
-			for (HedgingConfig config : configs) {
-				System.out.println("=尹志诚=" + config.getCoin() + " " + config.getAtmInRate()
-						+ " " + config.getDangjizhouDiffRate() + " " + config.getTitle());
-			}
 			// 从大到小排列，优先提交高指数的策略
-			/*
+			/**
 			configs.sort(new Comparator<HedgingConfig>() {
 				@Override
 				public int compare(HedgingConfig o1, HedgingConfig o2) {
 					// TODO Auto-generated method stub
-					return Float.compare(o2.getSellBuyThresholdRate(), o1.getSellBuyThresholdRate());
+					return Float.compare(o2.getAtmInRate(), o1.getAtmInRate());
 				}
 			});
+			**/
+			for (HedgingConfig config : configs) {
+				System.out.println("=尹志诚=" + config.getCoin() + " " + config.getAtmInRate()
+						+ " " + config.getDangjizhouDiffRate() + " " + config.getTitle() + " " + config.getVolume());
+			}
 
 			for (HedgingConfig config : configs) {
 //				手动近卖远买
-				execute(config, thisInstrument, nextInstrument, config.getSellBuyThresholdRate());
+				execute(config, thisInstrument, nextInstrument, config.getAtmInRate());
 			}
-			// 从大到小排列，优先提交高指数的策略
-			configs.sort(new Comparator<HedgingConfig>() {
-				@Override
-				public int compare(HedgingConfig o1, HedgingConfig o2) {
-					// TODO Auto-generated method stub
-					return Float.compare(o2.getBuySellThresholdRate(), o1.getBuySellThresholdRate());
-				}
-			});
-			for (HedgingConfig config : configs) {
-//				手动近买远卖
-				execute(config, nextInstrument, thisInstrument, config.getBuySellThresholdRate());
-			}
-			*/
+
+
 		}
 	}
 
@@ -143,6 +134,7 @@ public class StartHedgingServiceImpl implements WebSocketService {
 			if (!isInHegingHour(config, preInstrument, lastInstrument)) {
 				return;
 			}
+			/**
 			Level2Bean level2Buy = instrumentsDepthService.getBuyLevel2Postion(preInstrument.getInstrumentId(),
 					config.getBuyLevel());
 			Level2Bean level2Sell = instrumentsDepthService.getSellLevel2Postion(lastInstrument.getInstrumentId(),
@@ -155,7 +147,7 @@ public class StartHedgingServiceImpl implements WebSocketService {
 				}
 				
 			}
-
+			**/
 		}
 	}
 
@@ -302,6 +294,10 @@ public class StartHedgingServiceImpl implements WebSocketService {
 			return true;
 		}
 		long time = System.currentTimeMillis() + config.getLastHegingHour() * 3600000;
+		System.out.println("当前时间 + 配置时间" + new Date(time));
+		System.out.println("当周时间：" + new Date(preInstrument.getDeliveryTime()));
+		System.out.println("当季时间：" + new Date(preInstrument.getDeliveryTime()));
+		System.out.println(time < preInstrument.getDeliveryTime() && time < lastInstrument.getDeliveryTime());
 		return time < preInstrument.getDeliveryTime() && time < lastInstrument.getDeliveryTime();
 	}
 
