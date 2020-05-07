@@ -134,11 +134,16 @@ public class StartHedgingServiceImpl implements WebSocketService {
 			if (!isInHegingHour(config, preInstrument, lastInstrument)) {
 				return;
 			}
-			/**
+			System.out.println("===============");
 			Level2Bean level2Buy = instrumentsDepthService.getBuyLevel2Postion(preInstrument.getInstrumentId(),
 					config.getBuyLevel());
 			Level2Bean level2Sell = instrumentsDepthService.getSellLevel2Postion(lastInstrument.getInstrumentId(),
 					config.getSellLevel());
+			System.out.println(config.getBuyLevel());
+			System.out.println(level2Buy.getFloatPrice() + "Volum: " + level2Buy.getDoubleVolume());
+			System.out.println(level2Sell.getFloatPrice() + "Volum: " + level2Sell.getDoubleVolume());
+			System.out.println("===============");
+			/*
 			if (openHedging(config, level2Buy, level2Sell, thresholdRate)) {
 				
 				Hedging hedging = hedgingTrade(level2Buy, level2Sell, config, config.getStartPremiumRate());
@@ -147,7 +152,8 @@ public class StartHedgingServiceImpl implements WebSocketService {
 				}
 				
 			}
-			**/
+			*/
+
 		}
 	}
 
@@ -294,10 +300,6 @@ public class StartHedgingServiceImpl implements WebSocketService {
 			return true;
 		}
 		long time = System.currentTimeMillis() + config.getLastHegingHour() * 3600000;
-		System.out.println("当前时间 + 配置时间" + new Date(time));
-		System.out.println("当周时间：" + new Date(preInstrument.getDeliveryTime()));
-		System.out.println("当季时间：" + new Date(preInstrument.getDeliveryTime()));
-		System.out.println(time < preInstrument.getDeliveryTime() && time < lastInstrument.getDeliveryTime());
 		return time < preInstrument.getDeliveryTime() && time < lastInstrument.getDeliveryTime();
 	}
 
