@@ -134,26 +134,30 @@ public class StartHedgingServiceImpl implements WebSocketService {
 			if (!isInHegingHour(config, preInstrument, lastInstrument)) {
 				return;
 			}
+
 			System.out.println("===============");
 			Level2Bean level2Buy = instrumentsDepthService.getBuyLevel2Postion(preInstrument.getInstrumentId(),
 					config.getBuyLevel());
 			Level2Bean level2Sell = instrumentsDepthService.getSellLevel2Postion(lastInstrument.getInstrumentId(),
 					config.getSellLevel());
-			System.out.println(config.getBuyLevel());
-			System.out.println(level2Buy.getFloatPrice() + "Volum: " + level2Buy.getDoubleVolume());
-			System.out.println(level2Sell.getFloatPrice() + "Volum: " + level2Sell.getDoubleVolume());
-			System.out.println("===============");
-			/*
-			if (openHedging(config, level2Buy, level2Sell, thresholdRate)) {
-				
+
+			TickerBean tickerBean1 = instrumentsTickersService.getLastPrice(preInstrument.getInstrumentId());
+			TickerBean tickerBean2 = instrumentsTickersService.getLastPrice(lastInstrument.getInstrumentId());
+			TickerBean thisTickerIndex = instrumentsTickersService.getFiveMinIndexPrice(preInstrument.getInstrumentId());
+			TickerBean nextTickerIndex = instrumentsTickersService.getFiveMinIndexPrice(lastInstrument.getInstrumentId());
+			System.out.println("买：" + level2Buy.getFloatPrice() + "Volum: " + level2Buy.getDoubleVolume());
+
+			if (openHedging(config, tickerBean1, tickerBean2, thisTickerIndex,nextTickerIndex)) {
+				System.out.println("进场........");
+				/*
 				Hedging hedging = hedgingTrade(level2Buy, level2Sell, config, config.getStartPremiumRate());
 				if (hedging != null) {
 					addHedging(hedging);
 				}
-				
+				*/
+			}else{
+				System.out.println("不进场........");
 			}
-			*/
-
 		}
 	}
 
@@ -263,18 +267,30 @@ public class StartHedgingServiceImpl implements WebSocketService {
 	 * @param thresholdRate
 	 * @return
 	 */
-	private boolean openHedging(HedgingConfig config, Level2Bean level2Buy, Level2Bean level2Sell,
-			float thresholdRate) {
-		// 页面设置的是%比的设置，必须化成正常非%之后去计算
-		thresholdRate = thresholdRate / 100f;
-		if (level2Buy != null && level2Sell != null) {
-			float value = (level2Buy.getFloatPrice() - level2Sell.getFloatPrice()) / level2Sell.getFloatPrice();
-			if (config.isStart() && VolumeManager.getInstance().getVolume(config) > 0) {
-				if (value >= thresholdRate) {
-					return true;
-				}
-			}
+	private boolean openHedging(HedgingConfig config, TickerBean xianjia1, TickerBean xianjia2,
+								TickerBean jizhunjia1,TickerBean jizhunjia2) {
+		//1.判断参数是否初始化
+		if(xianjia1 == null || xianjia2 == null || jizhunjia1 == null || jizhunjia2 == null){
+			return false;
 		}
+		float atm_index_config = config.getAtmInRate();
+		float djz_diff_config = config.getDangjizhouDiffRate();
+		float dangzhou = xianjia1.getFloatLastPrice();
+		float dangji = xianjia2.getFloatLastPrice();
+		float dangzhou_index = jizhunjia1.getFloatIndexPrice();
+		float dangji_index = jizhunjia2.getFloatIndexPrice();
+		float atm_index = ((dangji - dangji_index) / dangji_index ) / ((dangzhou - dangzhou_index) / dangzhou_index);
+
+		//2.判断参数是否符合基础的数学条件
+		if((dangji - dangji_index) == 0f || (dangzhou - dangji_index) == 0f || dangji_index == 0f || dangzhou_index == 0f){
+			return false;
+		}
+		float dangji_f = (dangji - dangji_index) / dangji_index;
+		float dangzhou_f = (dangzhou - dangzhou_index) / dangzhou_index;
+		if(config.isStart() && atm_index > atm_index_config && Math.abs(dangji_f - dangzhou_f) > djz_diff_config){
+			return true;
+		}
+		System.out.println("奥特曼指数：" + atm_index + " 差价指数：" +  Math.abs(dangji_f - dangzhou_f));
 		return false;
 	}
 
