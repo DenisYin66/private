@@ -298,6 +298,7 @@ public class StartHedgingServiceImpl implements WebSocketService {
 			}
 		}
 		System.out.println("奥特曼指数：" + atm_index + " 差价指数：" +  Math.abs(dangji_f - dangzhou_f));
+		System.out.println(config.getTypeAction());
 		return false;
 	}
 

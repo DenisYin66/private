@@ -51,10 +51,10 @@ public class HedgingConfig implements Serializable {
 	 */
 	private float atmInRate = 1.45f;
 
-	private int atmInSign = 0;
 	/**
 	 * 用于atmInRate的符号，0表示大于atmInRate进场，1表示小于atmInRate进场
 	 */
+	private int atmInSign = 0;
 
 	/**
 	 * 溢价出场条件1:当季公式除以当周公式，当奥特曼指数低于此阀值就进行平仓套利交易
@@ -94,6 +94,11 @@ public class HedgingConfig implements Serializable {
 	 * 距离交割时间在多少小时内不开仓，目前以星期五交割日16:00交割,值为0代表不限制
 	 */
 	private int lastHegingHour = 5;
+
+	/**
+	 * 执行的策略类型 目前有 【0：当季做空，当周做多 1: 当季做多，当周做空】
+	 */
+	private int typeAction = 0;
 
 	/**
 	 * 对冲交易成交后，多少小时未止盈平仓的，采取强制平仓策略，0为不强制平仓。和可接受的强制平仓止损率LiquidRate一起配合使用
@@ -250,7 +255,13 @@ public class HedgingConfig implements Serializable {
 	public void setCoin(String coin) {
 		this.coin = coin;
 	}
+	public int getTypeAction() {
+		return typeAction;
+	}
 
+	public void setTypeAction(int typeAction) {
+		this.typeAction = typeAction;
+	}
 	public float getStartPremiumRate() {
 		return startPremiumRate;
 	}
