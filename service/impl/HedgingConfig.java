@@ -51,6 +51,11 @@ public class HedgingConfig implements Serializable {
 	 */
 	private float atmInRate = 1.45f;
 
+	private int atmInSign = 0;
+	/**
+	 * 用于atmInRate的符号，0表示大于atmInRate进场，1表示小于atmInRate进场
+	 */
+
 	/**
 	 * 溢价出场条件1:当季公式除以当周公式，当奥特曼指数低于此阀值就进行平仓套利交易
 	 */
@@ -140,6 +145,14 @@ public class HedgingConfig implements Serializable {
 
 	public void setSellLevel(int sellLevel) {
 		this.sellLevel = sellLevel;
+	}
+
+	public int getAtmInSign() {
+		return atmInSign;
+	}
+
+	public void setAtmInSign(int atmInSign) {
+		this.atmInSign = atmInSign;
 	}
 
 	public boolean isStart() {

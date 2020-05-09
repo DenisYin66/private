@@ -287,8 +287,15 @@ public class StartHedgingServiceImpl implements WebSocketService {
 		}
 		float dangji_f = (dangji - dangji_index) / dangji_index;
 		float dangzhou_f = (dangzhou - dangzhou_index) / dangzhou_index;
-		if(config.isStart() && atm_index > atm_index_config && Math.abs(dangji_f - dangzhou_f) > djz_diff_config){
-			return true;
+
+		if(config.getAtmInSign() != 1) {
+			if (config.isStart() && atm_index >= atm_index_config && Math.abs(dangji_f - dangzhou_f) > djz_diff_config) {
+				return true;
+			}
+		}else{
+			if (config.isStart() && atm_index <= atm_index_config && Math.abs(dangji_f - dangzhou_f) > djz_diff_config) {
+				return true;
+			}
 		}
 		System.out.println("奥特曼指数：" + atm_index + " 差价指数：" +  Math.abs(dangji_f - dangzhou_f));
 		return false;
