@@ -130,26 +130,32 @@ public class StartHedgingServiceImpl implements WebSocketService {
 			if (!isInHegingHour(config, preInstrument, lastInstrument)) {
 				return;
 			}
-
-			//System.out.println("===============");
-			Level2Bean level2Buy = instrumentsDepthService.getBuyLevel2Postion(preInstrument.getInstrumentId(),
-					config.getBuyLevel());
-			Level2Bean level2Sell = instrumentsDepthService.getSellLevel2Postion(lastInstrument.getInstrumentId(),
-					config.getSellLevel());
+			Level2Bean level2Buy = null;
+			Level2Bean level2Sell = null;
+			if(config.getTypeAction() == 0) { //当周做多，当季做空
+				level2Buy = instrumentsDepthService.getBuyLevel2Postion(preInstrument.getInstrumentId(),
+						config.getBuyLevel());
+				level2Sell = instrumentsDepthService.getSellLevel2Postion(lastInstrument.getInstrumentId(),
+						config.getSellLevel());
+			}else{  //当周做空，当季做多
+				level2Buy = instrumentsDepthService.getBuyLevel2Postion(lastInstrument.getInstrumentId(),
+						config.getBuyLevel());
+				level2Sell = instrumentsDepthService.getSellLevel2Postion(preInstrument.getInstrumentId(),
+						config.getSellLevel());
+			}
 
 			TickerBean tickerBean1 = instrumentsTickersService.getLastPrice(preInstrument.getInstrumentId());
 			TickerBean tickerBean2 = instrumentsTickersService.getLastPrice(lastInstrument.getInstrumentId());
 			TickerBean thisTickerIndex = instrumentsTickersService.getFiveMinIndexPrice(preInstrument.getInstrumentId());
 			TickerBean nextTickerIndex = instrumentsTickersService.getFiveMinIndexPrice(lastInstrument.getInstrumentId());
-			//System.out.println("买：" + level2Buy.getFloatPrice() + "Volum: " + level2Buy.getDoubleVolume());
+			System.out.println("买：" + level2Buy.getFloatPrice() + "Volum: " + level2Buy.getDoubleVolume());
+			System.out.println("卖：" + level2Sell.getFloatPrice() + "Volum: " + level2Sell.getDoubleVolume());
 
 			if (openHedging(config, tickerBean1, tickerBean2, thisTickerIndex,nextTickerIndex)) {
-				/*
 				Hedging hedging = hedgingTrade(level2Buy, level2Sell, config, config.getStartPremiumRate());
 				if (hedging != null) {
-					addHedging(hedging);
+					//addHedging(hedging);
 				}
-				*/
 			}else{
 			}
 		}
@@ -173,6 +179,10 @@ public class StartHedgingServiceImpl implements WebSocketService {
 		Hedging hedging = null;
 		// 计算可以交易合约张数，必须是买卖挂单最小值，同时小于最大单次下单合约数，小于可交易合约数
 		int volume = Math.min(level2Buy.getIntVolume(), level2Sell.getIntVolume()) - hedgingClient.getUsedVolume();
+		System.out.println("买单最小值：" + level2Buy.getIntVolume());
+		System.out.println("卖单最小值：" + level2Sell.getIntVolume());
+		System.out.println("已用：" + hedgingClient.getUsedVolume());
+
 		// 对冲后委托价上必须剩余这么多合约张数，防止对冲失败
 		int levelVolume = (int) (config.getStartThresholdAmount() / coinService.getUnitAmount(config.getCoin()));
 		volume = volume - levelVolume;
@@ -180,9 +190,11 @@ public class StartHedgingServiceImpl implements WebSocketService {
 		if (config.getMaxTradeVolume() > 0) {
 			volume = Math.min(config.getMaxTradeVolume(), volume);
 		}
+		System.out.println("最终购买张数：" + volume);
+
 		// 检查保证金是否足够
 		float price = getAvailablePrice(level2Buy, level2Sell, premiumRate);
-	
+		System.out.println("拟需要的总金额为：" + price);
 		double availableMargin = futureAccountService.getAvailableMargin(config.getCoin());
 		System.out.println("availableMargin " + availableMargin+"  getUsedMargin  "+hedgingClient.getUsedMargin());
 		availableMargin=availableMargin- hedgingClient.getUsedMargin();// 可用保证金
@@ -190,7 +202,7 @@ public class StartHedgingServiceImpl implements WebSocketService {
 				config.getLeverRate());
 		System.out.println("availableVolume " + availableVolume);
 		volume = Math.min(volume, availableVolume / 2);
-
+		/*
 		// 检查库存
 		// 限制合约张数，0为不限制
 		if (config.getVolume() > 0) { 
@@ -207,12 +219,13 @@ public class StartHedgingServiceImpl implements WebSocketService {
 			hedging = hedgingTrade(level2Buy, level2Sell, volume, volume, "1", config, premiumRate);
 			hedging.setAmount(volume);
 		}
+		*/
 		return hedging;
 	}
 
 	private float getAvailablePrice(Level2Bean level2Buy, Level2Bean level2Sell, float premiumRate) {
-		return level2Sell.getFloatPrice() * (1 + premiumRate / 100f) / 2f
-				+ level2Buy.getFloatPrice() * (1 - premiumRate / 100f) / 2f;
+		return level2Sell.getFloatPrice() * (1 + premiumRate) / 2f
+				+ level2Buy.getFloatPrice() * (1 - premiumRate) / 2f;
 	}
 
 	private Hedging hedgingTrade(Level2Bean level2Buy, Level2Bean level2Sell, int buyVolume, int sellVolume,
