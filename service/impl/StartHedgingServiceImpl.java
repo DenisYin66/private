@@ -114,10 +114,6 @@ public class StartHedgingServiceImpl implements WebSocketService {
 				}
 			});
 			**/
-			for (HedgingConfig config : configs) {
-				System.out.println("=尹志诚=" + config.getCoin() + " " + config.getAtmInRate()
-						+ " " + config.getDangjizhouDiffRate() + " " + config.getTitle() + " " + config.getVolume());
-			}
 
 			for (HedgingConfig config : configs) {
 //				手动近卖远买
@@ -135,7 +131,7 @@ public class StartHedgingServiceImpl implements WebSocketService {
 				return;
 			}
 
-			System.out.println("===============");
+			//System.out.println("===============");
 			Level2Bean level2Buy = instrumentsDepthService.getBuyLevel2Postion(preInstrument.getInstrumentId(),
 					config.getBuyLevel());
 			Level2Bean level2Sell = instrumentsDepthService.getSellLevel2Postion(lastInstrument.getInstrumentId(),
@@ -145,10 +141,9 @@ public class StartHedgingServiceImpl implements WebSocketService {
 			TickerBean tickerBean2 = instrumentsTickersService.getLastPrice(lastInstrument.getInstrumentId());
 			TickerBean thisTickerIndex = instrumentsTickersService.getFiveMinIndexPrice(preInstrument.getInstrumentId());
 			TickerBean nextTickerIndex = instrumentsTickersService.getFiveMinIndexPrice(lastInstrument.getInstrumentId());
-			System.out.println("买：" + level2Buy.getFloatPrice() + "Volum: " + level2Buy.getDoubleVolume());
+			//System.out.println("买：" + level2Buy.getFloatPrice() + "Volum: " + level2Buy.getDoubleVolume());
 
 			if (openHedging(config, tickerBean1, tickerBean2, thisTickerIndex,nextTickerIndex)) {
-				System.out.println("进场........");
 				/*
 				Hedging hedging = hedgingTrade(level2Buy, level2Sell, config, config.getStartPremiumRate());
 				if (hedging != null) {
@@ -156,7 +151,6 @@ public class StartHedgingServiceImpl implements WebSocketService {
 				}
 				*/
 			}else{
-				System.out.println("不进场........");
 			}
 		}
 	}
@@ -297,8 +291,6 @@ public class StartHedgingServiceImpl implements WebSocketService {
 				return true;
 			}
 		}
-		System.out.println("奥特曼指数：" + atm_index + " 差价指数：" +  Math.abs(dangji_f - dangzhou_f));
-		System.out.println(config.getTypeAction());
 		return false;
 	}
 

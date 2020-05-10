@@ -4,6 +4,7 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -15,6 +16,7 @@ import javax.jms.Session;
 import javax.jms.TextMessage;
 
 import com.okcoin.commons.okex.open.api.bean.futures.result.Ticker;
+import com.sun.org.apache.xpath.internal.operations.Bool;
 import com.yin.service.InstrumentsTickersService;
 import org.apache.activemq.command.ActiveMQDestination;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -47,6 +49,7 @@ public class HedgingDataServiceImpl extends BaseDataServiceImpl implements Hedgi
 	private FutureInstrumentService futureInstrumentService;
 	@Autowired
 	private SystemConfig systemConfig;
+	HedgingConfigManager hedgingConfigManager = HedgingConfigManager.getInstance();
 	@Resource
 	private JmsTemplate jmsTemplate;
 	@Resource(name = "destinations")
@@ -123,6 +126,15 @@ public class HedgingDataServiceImpl extends BaseDataServiceImpl implements Hedgi
 			// 奥特曼触发指数
 			aoteman_index = ((dangji - dangji_index) / dangji_index ) / ((dangzhou - dangzhou_index) / dangzhou_index);
 		}
+		List<HedgingConfig> configs = hedgingConfigManager.getConfigs("btc", "tq");
+		boolean isOpen = false;
+		String opentime = "";
+		for(HedgingConfig config : configs) {
+			isOpen = openHedging(config,tickerBean1, tickerBean2, thisTickerIndex, nextTickerIndex);
+			if(isOpen){
+				opentime = new Date(tickerBean1.getTime()).toString();
+			}
+		}
 		Map<String, Object> map = new HashMap<String, Object>();// 装的是%之后的结果
 		map.put("type", type);
 		map.put("time", System.currentTimeMillis()+"");
@@ -135,7 +147,9 @@ public class HedgingDataServiceImpl extends BaseDataServiceImpl implements Hedgi
 		map.put("dangzhou", dangzhou);
 		map.put("dangzhou_index_time",dangzhou_index_time);
 		map.put("dangji_index_time",dangji_index_time);
-		map.put("a_t_m", aoteman_index );
+		map.put("a_t_m",aoteman_index );
+		map.put("open",isOpen);
+		map.put("opentime",opentime);
 		hedgingContext.addHedgingData(map);
 		send(type + "_" + hedgingContext.getCoin(), map);
 	}
@@ -160,5 +174,38 @@ public class HedgingDataServiceImpl extends BaseDataServiceImpl implements Hedgi
 				return textMessage;
 			}
 		});
+	}
+
+	public boolean openHedging(HedgingConfig config, TickerBean xianjia1, TickerBean xianjia2,
+								TickerBean jizhunjia1,TickerBean jizhunjia2) {
+		//1.判断参数是否初始化
+		if(xianjia1 == null || xianjia2 == null || jizhunjia1 == null || jizhunjia2 == null){
+			return false;
+		}
+		float atm_index_config = config.getAtmInRate();
+		float djz_diff_config = config.getDangjizhouDiffRate();
+		float dangzhou = xianjia1.getFloatLastPrice();
+		float dangji = xianjia2.getFloatLastPrice();
+		float dangzhou_index = jizhunjia1.getFloatIndexPrice();
+		float dangji_index = jizhunjia2.getFloatIndexPrice();
+		float atm_index = ((dangji - dangji_index) / dangji_index ) / ((dangzhou - dangzhou_index) / dangzhou_index);
+
+		//2.判断参数是否符合基础的数学条件
+		if((dangji - dangji_index) == 0f || (dangzhou - dangji_index) == 0f || dangji_index == 0f || dangzhou_index == 0f){
+			return false;
+		}
+		float dangji_f = (dangji - dangji_index) / dangji_index;
+		float dangzhou_f = (dangzhou - dangzhou_index) / dangzhou_index;
+
+		if(config.getAtmInSign() != 1) {
+			if (config.isStart() && atm_index >= atm_index_config && Math.abs(dangji_f - dangzhou_f) > djz_diff_config) {
+				return true;
+			}
+		}else{
+			if (config.isStart() && atm_index <= atm_index_config && Math.abs(dangji_f - dangzhou_f) > djz_diff_config) {
+				return true;
+			}
+		}
+		return false;
 	}
 }
