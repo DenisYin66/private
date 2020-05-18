@@ -229,12 +229,12 @@ public class StartHedgingServiceImpl implements WebSocketService {
 	private Hedging hedgingTrade(Level2Bean level2Buy, Level2Bean level2Sell, int buyVolume, int sellVolume,
 			String type, HedgingConfig config, float premiumRate) {
 		HedgingTrade buyTrade = new HedgingTrade();
-		if (buyVolume > 0 && level2Sell != null) {
+		if (buyVolume > 0 && level2Buy != null) {
 			buyTrade.setLeverRate(config.getLeverRate());
-			buyTrade.setInstrumentId(level2Sell.getInstrumentId());
+			buyTrade.setInstrumentId(level2Buy.getInstrumentId());
 			Instrument futureInstrument = instrumentService.getInstrument(buyTrade.getInstrumentId());
 			buyTrade.setDeliveryTime(futureInstrument.getDeliveryTime());
-			buyTrade.setPrice(level2Sell.getFloatPrice() * (1 + premiumRate / 100f));
+			buyTrade.setPrice(level2Buy.getFloatPrice() * (1 + premiumRate / 100f));
 			buyTrade.setAmount(buyVolume);
 			if ("3".equals(type)) {
 				buyTrade.setType("4");
@@ -244,12 +244,12 @@ public class StartHedgingServiceImpl implements WebSocketService {
 
 		}
 		HedgingTrade sellTrade = new HedgingTrade();
-		if (sellVolume > 0 && level2Buy != null) {
+		if (sellVolume > 0 && level2Sell != null) {
 			sellTrade.setLeverRate(config.getLeverRate());
-			sellTrade.setInstrumentId(level2Buy.getInstrumentId());
+			sellTrade.setInstrumentId(level2Sell.getInstrumentId());
 			Instrument futureInstrument = instrumentService.getInstrument(sellTrade.getInstrumentId());
 			sellTrade.setDeliveryTime(futureInstrument.getDeliveryTime());
-			sellTrade.setPrice(level2Buy.getFloatPrice() * (1 - premiumRate / 100f));
+			sellTrade.setPrice(level2Sell.getFloatPrice() * (1 - premiumRate / 100f));
 			sellTrade.setAmount(sellVolume);
 			if ("1".equals(type)) {
 				sellTrade.setType("2");
