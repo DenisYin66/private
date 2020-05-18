@@ -125,6 +125,7 @@ public class HedgingClient {
 	private int tradeCount = 0;
 
 	public void finish() throws TimeoutException {
+		System.out.println("进入finish啦");
 		tradeCount = 0;
 		Map<String, List<HedgingTrade>> sortTradesMap = new HashMap<>();
 		for (Hedging hedging : hedgings) {
@@ -134,6 +135,7 @@ public class HedgingClient {
 			} else {
 				int currentBuyCount = sortTrade(hedging.getBuyTrade(), sortTradesMap);
 				int currentSellCount = sortTrade(hedging.getSellTrade(), sortTradesMap);
+				System.out.println(currentBuyCount + " " + currentSellCount);
 				if (currentBuyCount == 5 || currentSellCount == 5) {
 					System.out.println("currentBuy等于5");
 					finish(sortTradesMap);
@@ -141,6 +143,7 @@ public class HedgingClient {
 			}
 		}
 		finish(sortTradesMap);
+		System.out.println("结束了");
 		hedgings.clear();
 	}
 
