@@ -114,10 +114,9 @@ public class HedgingClient {
 			System.out.println("进入aaaaaa啦");
 			if (!batchOrders.isEmpty()) {
 				System.out.println("进入bbbbb啦");
-				if ("production".equals(SpringContextHolder.getActiveProfile())) {
-					System.out.println("进入tradeApiService啦");
-					tradeApiService.batchOrders(batchOrders);
-				}
+				//if ("production".equals(SpringContextHolder.getActiveProfile())) {
+				tradeApiService.batchOrders(batchOrders);
+				//}
 				tradeCount++;
 				batchOrders.clear();
 			}
