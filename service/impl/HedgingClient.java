@@ -129,15 +129,15 @@ public class HedgingClient {
 	public void finish() throws TimeoutException {
 		tradeCount = 0;
 		Map<String, List<HedgingTrade>> sortTradesMap = new HashMap<>();
-		System.out.println(hedgings.size() + " " + tradeCount);
 		for (Hedging hedging : hedgings) {
+			System.out.println(hedgings.size() + " " + tradeCount);
 			if (tradeCount >= 20) {
 				// 超过了每2秒20次的请求限制
 				cancelHedging(hedging);
 			} else {
 				int currentBuyCount = sortTrade(hedging.getBuyTrade(), sortTradesMap);
 				int currentSellCount = sortTrade(hedging.getSellTrade(), sortTradesMap);
-				System.out.println(currentBuyCount + " " + currentSellCount);
+				System.out.println(currentBuyCount + " 啊当当" + currentSellCount);
 				if (currentBuyCount == 5 || currentSellCount == 5) {
 					System.out.println("currentBuy等于5");
 					finish(sortTradesMap);
