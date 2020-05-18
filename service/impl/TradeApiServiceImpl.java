@@ -169,12 +169,14 @@ public class TradeApiServiceImpl implements TradeApiService{
 				futureOrder.setSize(trade.getAmount());
 				futureOrder.setType(Integer.parseInt(trade.getType()));
 				orders_data.add(futureOrder);
+				System.out.println("提交交易" + "价格：" + trade.getPrice() + "数量：" + trade.getAmount());
 				trade.setStatus(1);
 				orderTrades.put(trade.getHedgingTradeId(), trade);
 			}
 		}
 		if(!orders_data.isEmpty())
 		{
+			System.out.println("整体要提交了");
 			Orders orders = new Orders();
 			orders.setinstrument_id(instrument_id);
 			orders.setLeverage((double)leverage);

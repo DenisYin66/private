@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeoutException;
 
+import com.sun.org.apache.xerces.internal.util.SynchronizedSymbolTable;
 import com.yin.service.TradeApiService;
 import com.yin.spring.SpringContextHolder;
 
@@ -112,6 +113,7 @@ public class HedgingClient {
 		for (List<HedgingTrade> batchOrders : sortTradesMap.values()) {
 			if (!batchOrders.isEmpty()) {
 				if ("production".equals(SpringContextHolder.getActiveProfile())) {
+					System.out.println("进入tradeApiService啦");
 					tradeApiService.batchOrders(batchOrders);
 				}
 				tradeCount++;
@@ -133,6 +135,7 @@ public class HedgingClient {
 				int currentBuyCount = sortTrade(hedging.getBuyTrade(), sortTradesMap);
 				int currentSellCount = sortTrade(hedging.getSellTrade(), sortTradesMap);
 				if (currentBuyCount == 5 || currentSellCount == 5) {
+					System.out.println("currentBuy等于5");
 					finish(sortTradesMap);
 				}
 			}
