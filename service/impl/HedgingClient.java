@@ -111,7 +111,9 @@ public class HedgingClient {
 
 	private void finish(Map<String, List<HedgingTrade>> sortTradesMap) throws TimeoutException {
 		for (List<HedgingTrade> batchOrders : sortTradesMap.values()) {
+			System.out.println("进入aaaaaa啦");
 			if (!batchOrders.isEmpty()) {
+				System.out.println("进入bbbbb啦");
 				if ("production".equals(SpringContextHolder.getActiveProfile())) {
 					System.out.println("进入tradeApiService啦");
 					tradeApiService.batchOrders(batchOrders);
@@ -125,9 +127,9 @@ public class HedgingClient {
 	private int tradeCount = 0;
 
 	public void finish() throws TimeoutException {
-		System.out.println("进入finish啦");
 		tradeCount = 0;
 		Map<String, List<HedgingTrade>> sortTradesMap = new HashMap<>();
+		System.out.println(hedgings.size() + " " + tradeCount);
 		for (Hedging hedging : hedgings) {
 			if (tradeCount >= 20) {
 				// 超过了每2秒20次的请求限制
@@ -143,7 +145,6 @@ public class HedgingClient {
 			}
 		}
 		finish(sortTradesMap);
-		System.out.println("结束了");
 		hedgings.clear();
 	}
 
