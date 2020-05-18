@@ -152,9 +152,10 @@ public class StartHedgingServiceImpl implements WebSocketService {
 			System.out.println("卖：" + level2Sell.getFloatPrice() + "Volum: " + level2Sell.getDoubleVolume());
 
 			if (openHedging(config, tickerBean1, tickerBean2, thisTickerIndex,nextTickerIndex)) {
+				System.out.println("进场啦");
 				Hedging hedging = hedgingTrade(level2Buy, level2Sell, config, config.getStartPremiumRate());
 				if (hedging != null) {
-					//addHedging(hedging);
+					addHedging(hedging);
 				}
 			}else{
 			}
@@ -185,12 +186,11 @@ public class StartHedgingServiceImpl implements WebSocketService {
 
 		// 对冲后委托价上必须剩余这么多合约张数，防止对冲失败
 		int levelVolume = (int) (config.getStartThresholdAmount() / coinService.getUnitAmount(config.getCoin()));
-		volume = volume - levelVolume;
+		//volume = volume - levelVolume;
 
 		if (config.getMaxTradeVolume() > 0) {
 			volume = Math.min(config.getMaxTradeVolume(), volume);
 		}
-		System.out.println("最终购买张数：" + volume);
 
 		// 检查保证金是否足够
 		float price = getAvailablePrice(level2Buy, level2Sell, premiumRate);
@@ -202,7 +202,7 @@ public class StartHedgingServiceImpl implements WebSocketService {
 				config.getLeverRate());
 		System.out.println("availableVolume " + availableVolume);
 		volume = Math.min(volume, availableVolume / 2);
-		/*
+		System.out.println("最终购买张数：" + volume);
 		// 检查库存
 		// 限制合约张数，0为不限制
 		if (config.getVolume() > 0) { 
@@ -210,7 +210,6 @@ public class StartHedgingServiceImpl implements WebSocketService {
 			if (leftVolume > 0) {
 				volume = Math.min(leftVolume, volume);
 			}
-
 			// 减掉库存
 			volume = VolumeManager.getInstance().getSetVolume(config, volume);
 		}
@@ -219,13 +218,12 @@ public class StartHedgingServiceImpl implements WebSocketService {
 			hedging = hedgingTrade(level2Buy, level2Sell, volume, volume, "1", config, premiumRate);
 			hedging.setAmount(volume);
 		}
-		*/
 		return hedging;
 	}
 
 	private float getAvailablePrice(Level2Bean level2Buy, Level2Bean level2Sell, float premiumRate) {
-		return level2Sell.getFloatPrice() * (1 + premiumRate) / 2f
-				+ level2Buy.getFloatPrice() * (1 - premiumRate) / 2f;
+		return level2Sell.getFloatPrice() * (1 - premiumRate) / 2f
+				+ level2Buy.getFloatPrice() * (1 + premiumRate) / 2f;
 	}
 
 	private Hedging hedgingTrade(Level2Bean level2Buy, Level2Bean level2Sell, int buyVolume, int sellVolume,
