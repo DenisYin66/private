@@ -207,6 +207,7 @@ public class StartHedgingServiceImpl implements WebSocketService {
 		// 限制合约张数，0为不限制
 		if (config.getVolume() > 0) { 
 			int leftVolume = VolumeManager.getInstance().getVolume(config);
+			System.out.println("还剩多少张可买：" + leftVolume);
 			if (leftVolume > 0) {
 				volume = Math.min(leftVolume, volume);
 			}
