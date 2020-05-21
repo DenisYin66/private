@@ -36,6 +36,13 @@ public class VolumeManager {
 		return volume;
 	}
 
+	public synchronized int getUsedVolume(HedgingConfig config){
+		if (!usedVolumesMap.containsKey(config.getConfigId()))
+			usedVolumesMap.put(config.getConfigId(), 0);
+		int volume = usedVolumesMap.get(config.getConfigId());
+		return volume;
+	}
+
 	/**
 	 * 占用合约张数，如果要的合约张数超过库存，将占用失败返回0
 	 * 
