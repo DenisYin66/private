@@ -202,12 +202,11 @@ public class StartHedgingServiceImpl implements WebSocketService {
 				config.getLeverRate());
 		System.out.println("availableVolume " + availableVolume);
 		volume = Math.min(volume, availableVolume / 2);
-		System.out.println("最终购买张数：" + volume);
 		// 检查库存
 		// 限制合约张数，0为不限制
 		if (config.getVolume() > 0) { 
 			int leftVolume = VolumeManager.getInstance().getVolume(config);
-			int AvailableMinusUsed = availableVolume - VolumeManager.getInstance().getUsedVolume(config);
+			int AvailableMinusUsed = availableVolume/2 - config.getVolume() + volume;
 			System.out.println("还剩多少张可买：" + leftVolume);
 			System.out.println("还剩多少张可买2：" + AvailableMinusUsed);
 			if (leftVolume > 0) {
