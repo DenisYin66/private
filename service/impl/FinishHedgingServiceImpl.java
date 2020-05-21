@@ -47,6 +47,7 @@ public class FinishHedgingServiceImpl {
 
 	@Scheduled(fixedDelay = 200)
 	private void execute() {
+		/*
 		hedgingClient.start();
 		cancelClient.start();
 		for (Hedging hedging : hedgingManager.getHedgings()) {
@@ -61,6 +62,7 @@ public class FinishHedgingServiceImpl {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+		*/
 	}
 
 	private void cancelHedgings(List<Hedging> hedgings) {
