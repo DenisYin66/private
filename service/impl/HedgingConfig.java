@@ -57,6 +57,11 @@ public class HedgingConfig implements Serializable {
 	private int atmInSign = 0;
 
 	/**
+	 * 奥特曼指数拐点差值
+	 */
+	private float atmDiff = 0.01f;
+
+	/**
 	 * 溢价出场条件1:当季公式除以当周公式，当奥特曼指数低于此阀值就进行平仓套利交易
 	 */
 	private float atmOutRate = 1.1f;
@@ -278,4 +283,11 @@ public class HedgingConfig implements Serializable {
 		this.finishPremiumRate = finishPremiumRate;
 	}
 
+	public float getAtmDiff() {
+		return atmDiff;
+	}
+
+	public void setAtmDiff(float atmDiff) {
+		this.atmDiff = atmDiff;
+	}
 }

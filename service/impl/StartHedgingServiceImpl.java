@@ -2,16 +2,15 @@ package com.yin.service.impl;
 
 import java.time.DayOfWeek;
 import java.time.LocalDateTime;
-import java.util.Comparator;
-import java.util.Date;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeoutException;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
 
 import com.yin.service.*;
+import org.apache.activemq.command.ActiveMQDestination;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -39,6 +38,8 @@ public class StartHedgingServiceImpl implements WebSocketService {
 	CoinServiceImpl coinService;
 	HedgingConfigManager hedgingConfigManager = HedgingConfigManager.getInstance();
 	HedgingClient hedgingClient;
+
+	private Map<String, Float> lastAtmIn = new ConcurrentHashMap<String, Float>();
 
 	@PostConstruct
 	public void init() {
@@ -126,6 +127,7 @@ public class StartHedgingServiceImpl implements WebSocketService {
 
 	private void execute(HedgingConfig config, Instrument preInstrument, Instrument lastInstrument,
 			float thresholdRate) {
+		System.out.println(config.getAtmInRate() < -1.45);
 		if (config.isStart() && VolumeManager.getInstance().getVolume(config) > 0) {
 			if (!isInHegingHour(config, preInstrument, lastInstrument)) {
 				return;
@@ -206,7 +208,7 @@ public class StartHedgingServiceImpl implements WebSocketService {
 		// 限制合约张数，0为不限制
 		if (config.getVolume() > 0) { 
 			int leftVolume = VolumeManager.getInstance().getVolume(config);
-			int AvailableMinusUsed = availableVolume/2 - config.getVolume() + volume;
+			int AvailableMinusUsed = availableVolume/2 - (config.getVolume() - leftVolume);
 			System.out.println("还剩多少张可买：" + leftVolume);
 			System.out.println("还剩多少张可买2：" + AvailableMinusUsed);
 			if (leftVolume > 0) {
@@ -293,18 +295,33 @@ public class StartHedgingServiceImpl implements WebSocketService {
 		if((dangji - dangji_index) == 0f || (dangzhou - dangji_index) == 0f || dangji_index == 0f || dangzhou_index == 0f){
 			return false;
 		}
+
+		//3. 初始化上一次奥特曼指数
+		if(lastAtmIn.get("lastatm") == null){
+			lastAtmIn.put("lastatm",atm_index);
+			return false;
+		}
+
 		float dangji_f = (dangji - dangji_index) / dangji_index;
 		float dangzhou_f = (dangzhou - dangzhou_index) / dangzhou_index;
+		float lastatm = lastAtmIn.get("lastatm");
 
 		if(config.getAtmInSign() != 1) {
 			if (config.isStart() && atm_index >= atm_index_config && Math.abs(dangji_f - dangzhou_f) > djz_diff_config) {
-				return true;
+				if(lastatm - atm_index >= config.getAtmDiff()) { //下降
+					lastAtmIn.put("lastatm",atm_index);
+					return true;
+				}
 			}
 		}else{
 			if (config.isStart() && atm_index <= atm_index_config && Math.abs(dangji_f - dangzhou_f) > djz_diff_config) {
-				return true;
+				if(atm_index - lastatm >= config.getAtmDiff()) { //上升
+					lastAtmIn.put("lastatm",atm_index);
+					return true;
+				}
 			}
 		}
+		lastAtmIn.put("lastatm",atm_index);
 		return false;
 	}
 

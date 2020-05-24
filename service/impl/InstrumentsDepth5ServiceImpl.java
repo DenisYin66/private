@@ -61,8 +61,12 @@ public class InstrumentsDepth5ServiceImpl implements WebSocketService, Instrumen
 	@Override
 	public Level2Bean getSellLevel2Postion(String instrumentId, int pos) {
 		DepthService depthService = depthServices.get(instrumentId);
-		if (depthService != null)
+		if (depthService != null) {
+			if (pos == 0) {
+				return depthService.getBuyFirst();
+			}
 			return depthService.getSellLevel2Postion(pos);
+		}
 		return null;
 	}
 
@@ -75,8 +79,12 @@ public class InstrumentsDepth5ServiceImpl implements WebSocketService, Instrumen
 	@Override
 	public Level2Bean getBuyLevel2Postion(String instrumentId, int pos) {
 		DepthService depthService = depthServices.get(instrumentId);
-		if (depthService != null)
+		if (depthService != null) {
+			if (pos == 0) {
+				return depthService.getSellFirst();
+			}
 			return depthService.getBuyLevel2Postion(pos);
+		}
 		return null;
 	}
 
