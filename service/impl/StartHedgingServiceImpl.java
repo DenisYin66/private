@@ -316,6 +316,7 @@ public class StartHedgingServiceImpl implements WebSocketService {
 		float dangzhou_f = (dangzhou - dangzhou_index) / dangzhou_index;
 		float lastatm = lastAtmIn.get("lastatm");
 		System.out.println("上一次奥特曼指数为:" + lastatm);
+		System.out.println("本次奥特曼指数为:" + atm_index);
 		if(config.getAtmInSign() != 1) {
 			if (config.isStart() && atm_index >= atm_index_config && Math.abs(dangji_f - dangzhou_f) > djz_diff_config) {
 				if(lastatm - atm_index >= config.getAtmDiff()) { //下降
@@ -331,7 +332,12 @@ public class StartHedgingServiceImpl implements WebSocketService {
 				}
 			}
 		}
-		lastAtmIn.put("lastatm",atm_index);
+		long twosec = 2 *1000;
+		Calendar cal2 = Calendar.getInstance();
+		long currentTime = cal2.getTime().getTime();
+		if(currentTime%twosec < 1000) {
+			lastAtmIn.put("lastatm", atm_index);
+		}
 		return false;
 	}
 
