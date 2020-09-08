@@ -53,8 +53,8 @@ public class InstrumentsTickersServiceImpl implements WebSocketService, Instrume
 										if (tickerService == null) {
 											tickerService = new ArrayTickerServiceImpl();
 											tickersServices.put(instrumentId, tickerService);
-											tickerService.processData(table,OkexConstant.PARTIAL_ACTION, (JSONObject) instrument);
 										}
+										tickerService.processData(table,OkexConstant.PARTIAL_ACTION, (JSONObject) instrument);
 									}});
 								t.start();
 								//处理5分钟基准价格
@@ -63,10 +63,12 @@ public class InstrumentsTickersServiceImpl implements WebSocketService, Instrume
 								DateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'hh:mm:ss.sss'Z'");
 								BigDecimal lastPrice = instrumentJSON.getBigDecimal(OkexConstant.LAST);
 								String timestamp = instrumentJSON.getString("timestamp");
+								System.out.println("没进去");
 								try {
 									long time = sdf.parse(timestamp).getTime();
 									//System.out.println(indexDate.getTime());
 									if (time > indexDate.getTime() - 8 * 60 * 60 * 1000 && time < indexDate.getTime() - 8 * 60 * 60 *1000 + 60*1000) {
+										System.out.println("进来了");
 										if (cacheFiveMinPeriodTickers.get(instrumentId) == null) {
 											putCacheFiveMinPeriodTickers(instrumentId,lastPrice,time);
 										} else {
