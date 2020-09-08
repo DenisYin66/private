@@ -63,13 +63,16 @@ public class InstrumentsTickersServiceImpl implements WebSocketService, Instrume
 								DateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'hh:mm:ss.sss'Z'");
 								BigDecimal lastPrice = instrumentJSON.getBigDecimal(OkexConstant.LAST);
 								String timestamp = instrumentJSON.getString("timestamp");
-								System.out.println("没进去");
+								//System.out.println("没进去");
 								try {
 									long time = sdf.parse(timestamp).getTime();
+									System.out.println(time > indexDate.getTime() - 8 * 60 * 60 * 1000);
 									//System.out.println(indexDate.getTime());
 									System.out.println("当前时间：" + timestamp);
+									System.out.println(time > (indexDate.getTime() - 8 * 60 * 60 * 1000));
+									System.out.println(time < (indexDate.getTime() - 8 * 60 * 60 *1000 + 60*1000));
 									System.out.println(time > indexDate.getTime() - 8 * 60 * 60 * 1000 && time < indexDate.getTime() - 8 * 60 * 60 *1000 + 60*1000);
-									if (time > indexDate.getTime() - 8 * 60 * 60 * 1000 && time < indexDate.getTime() - 8 * 60 * 60 *1000 + 60*1000) {
+									if ((time > (indexDate.getTime() - 8 * 60 * 60 * 1000)) && (time < (indexDate.getTime() - 8 * 60 * 60 *1000 + 60*1000))) {
 										System.out.println("进来了...");
 										if (cacheFiveMinPeriodTickers.get(instrumentId) == null) {
 											putCacheFiveMinPeriodTickers(instrumentId,lastPrice,time);
