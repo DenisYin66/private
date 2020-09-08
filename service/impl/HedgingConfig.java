@@ -49,7 +49,7 @@ public class HedgingConfig implements Serializable {
 	/**
 	 * 溢价入场条件2:当季公式除以当周公式，当奥特曼指数超过此阀值就进行套利交易
 	 */
-	private float atmInRate = 1.45f;
+	private float atmInRate = 50.0f;
 
 	/**
 	 * 用于atmInRate的符号，0表示大于atmInRate进场，1表示小于atmInRate进场
