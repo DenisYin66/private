@@ -12,6 +12,7 @@ import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * 获取合约的最新成交价、买一价、卖一价和24交易量等信息
@@ -21,7 +22,7 @@ import java.util.*;
 @Service("instrumentsTickersService")
 public class InstrumentsTickersServiceImpl implements WebSocketService, InstrumentsTickersService {
 	Map<String, TickerService> tickersServices = new HashMap<>();
-	private Map<String, TickerBean> cacheFiveMinPeriodTickers = new HashMap<>();
+	Map<String, TickerBean> cacheFiveMinPeriodTickers = new ConcurrentHashMap<>();
 
 	@Override
 	public void onReceive(Object obj) {
@@ -41,19 +42,23 @@ public class InstrumentsTickersServiceImpl implements WebSocketService, Instrume
 						while (it.hasNext()) {
 							Object instrument = it.next();
 							if (instrument instanceof JSONObject) {
-								JSONObject instrumentJSON = (JSONObject) instrument;
-								String instrumentId = instrumentJSON.getString(OkexConstant.INSTRUMENT_ID);
-								TickerService tickerService = tickersServices.get(instrumentId);
-								if (tickerService == null) {
-									tickerService = new ArrayTickerServiceImpl();
-									tickersServices.put(instrumentId, tickerService);
-								}
-								tickerService.processData(table,OkexConstant.PARTIAL_ACTION, (JSONObject) instrument);
-
-								//处理5分钟基准价格
-								long fivemin = 5 * 60 *1000;
 								Calendar cal2 = Calendar.getInstance();
 								long currentTime = cal2.getTime().getTime();
+								JSONObject instrumentJSON = (JSONObject) instrument;
+								String instrumentId = instrumentJSON.getString(OkexConstant.INSTRUMENT_ID);
+								Thread t = new Thread(new Runnable(){
+									public void run(){
+										// run方法具体重写
+										TickerService tickerService = tickersServices.get(instrumentId);
+										if (tickerService == null) {
+											tickerService = new ArrayTickerServiceImpl();
+											tickersServices.put(instrumentId, tickerService);
+											tickerService.processData(table,OkexConstant.PARTIAL_ACTION, (JSONObject) instrument);
+										}
+									}});
+								t.start();
+								//处理5分钟基准价格
+								long fivemin = 5 * 60 *1000;
 								Date indexDate = new Date(currentTime - currentTime%fivemin);
 								DateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'hh:mm:ss.sss'Z'");
 								BigDecimal lastPrice = instrumentJSON.getBigDecimal(OkexConstant.LAST);
