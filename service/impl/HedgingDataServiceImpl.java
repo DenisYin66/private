@@ -122,10 +122,10 @@ public class HedgingDataServiceImpl extends BaseDataServiceImpl implements Hedgi
 			Date b = new Date(nextTickerIndex.getTime());
 			dangji_index_time = b.toString();
 		}
-		if (tickerBean1 != null && tickerBean2 != null) {
+		if (tickerBean1 != null && tickerBean2 != null && thisTickerIndex!=null && nextTickerIndex !=null) {
 			// 奥特曼触发指数
 			//版本1 aoteman_index = ((dangji - dangji_index) / dangji_index ) / ((dangzhou - dangzhou_index) / dangzhou_index);
-			aoteman_index = ((dangji - dangzhou) + (dangji_index - dangzhou_index))/2;
+			aoteman_index = ((dangji - dangzhou) - (dangji_index - dangzhou_index))/2;
 		}
 		List<HedgingConfig> configs = hedgingConfigManager.getConfigs("btc", "tq");
 		boolean isOpen = false;
