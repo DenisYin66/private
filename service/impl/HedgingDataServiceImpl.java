@@ -18,6 +18,7 @@ import javax.jms.TextMessage;
 import com.okcoin.commons.okex.open.api.bean.futures.result.Ticker;
 import com.sun.org.apache.xpath.internal.operations.Bool;
 import com.yin.service.InstrumentsTickersService;
+import com.yin.util.AtmHelp;
 import org.apache.activemq.command.ActiveMQDestination;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jms.core.JmsTemplate;
@@ -125,8 +126,9 @@ public class HedgingDataServiceImpl extends BaseDataServiceImpl implements Hedgi
 		if (tickerBean1 != null && tickerBean2 != null && thisTickerIndex!=null && nextTickerIndex !=null) {
 			// 奥特曼触发指数
 			//版本1 aoteman_index = ((dangji - dangji_index) / dangji_index ) / ((dangzhou - dangzhou_index) / dangzhou_index);
-			aoteman_index = ((dangji - dangzhou) - (dangji_index - dangzhou_index))/2;
+			aoteman_index = AtmHelp.computerAtm(dangji,dangji_index,dangzhou,dangzhou_index);
 		}
+
 		List<HedgingConfig> configs = hedgingConfigManager.getConfigs("btc", "tq");
 		boolean isOpen = false;
 		String opentime = "";

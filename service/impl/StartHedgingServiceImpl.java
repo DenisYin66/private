@@ -10,6 +10,7 @@ import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
 
 import com.yin.service.*;
+import com.yin.util.AtmHelp;
 import org.apache.activemq.command.ActiveMQDestination;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -40,6 +41,7 @@ public class StartHedgingServiceImpl implements WebSocketService {
 	HedgingClient hedgingClient;
 
 	private Map<String, Float> lastAtmIn = new ConcurrentHashMap<String, Float>();
+	private boolean isOpening = false;
 
 	@PostConstruct
 	public void init() {
@@ -127,7 +129,6 @@ public class StartHedgingServiceImpl implements WebSocketService {
 
 	private void execute(HedgingConfig config, Instrument preInstrument, Instrument lastInstrument,
 			float thresholdRate) {
-		System.out.println(config.getAtmInRate() < -1.45);
 		if (config.isStart() && VolumeManager.getInstance().getVolume(config) > 0) {
 			if (!isInHegingHour(config, preInstrument, lastInstrument)) {
 				return;
@@ -155,10 +156,16 @@ public class StartHedgingServiceImpl implements WebSocketService {
 
 			if (openHedging(config, tickerBean1, tickerBean2, thisTickerIndex,nextTickerIndex)) {
 				System.out.println("进场啦");
+				float dangzhou = tickerBean1.getFloatLastPrice();
+				float dangji = tickerBean2.getFloatLastPrice();
+				float dangzhou_index = thisTickerIndex.getFloatIndexPrice();
+				float dangji_index = nextTickerIndex.getFloatIndexPrice();
+				float atm_index = AtmHelp.computerAtm(dangji,dangji_index,dangzhou,dangzhou_index);
+
 				int volume = getHedgingVolumns(level2Buy, level2Sell, config, config.getStartPremiumRate());
 				while (volume >= 10) {
 					Hedging hedging = null;
-					hedging = hedgingTrade(level2Buy, level2Sell, 10, 10, "1", config, config.getStartPremiumRate());
+					hedging = hedgingTrade(level2Buy, level2Sell, 10, 10, "1", config, config.getStartPremiumRate(),atm_index);
 					hedging.setAmount(volume);
 					if (hedging != null) {
 						addHedging(hedging);
@@ -167,7 +174,7 @@ public class StartHedgingServiceImpl implements WebSocketService {
 				}
 				if(volume > 0){
 					Hedging hedging = null;
-					hedging = hedgingTrade(level2Buy, level2Sell, volume, volume, "1", config, config.getStartPremiumRate());
+					hedging = hedgingTrade(level2Buy, level2Sell, volume, volume, "1", config, config.getStartPremiumRate(),atm_index);
 					hedging.setAmount(volume);
 					if (hedging != null) {
 						addHedging(hedging);
@@ -198,7 +205,7 @@ public class StartHedgingServiceImpl implements WebSocketService {
 	 * @return
 	 */
 	private Hedging hedgingTrade(Level2Bean level2Buy, Level2Bean level2Sell, int buyVolume, int sellVolume,
-			String type, HedgingConfig config, float premiumRate) {
+			String type, HedgingConfig config, float premiumRate,float atm_index) {
 		HedgingTrade buyTrade = new HedgingTrade();
 		if (buyVolume > 0 && level2Buy != null) {
 			buyTrade.setLeverRate(config.getLeverRate());
@@ -207,6 +214,7 @@ public class StartHedgingServiceImpl implements WebSocketService {
 			buyTrade.setDeliveryTime(futureInstrument.getDeliveryTime());
 			buyTrade.setPrice(level2Buy.getFloatPrice() * (1 + premiumRate / 100f));
 			buyTrade.setAmount(buyVolume);
+			buyTrade.setAtm_index(atm_index);
 			if ("3".equals(type)) {
 				buyTrade.setType("4");
 			} else {
@@ -263,6 +271,7 @@ public class StartHedgingServiceImpl implements WebSocketService {
 
 		// 检查库存
 		// 限制合约张数，0为不限制
+		/*
 		if (config.getVolume() > 0) {
 			int leftVolume = VolumeManager.getInstance().getVolume(config);
 			int AvailableMinusUsed = availableVolume/2 - (config.getVolume() - leftVolume);
@@ -273,6 +282,7 @@ public class StartHedgingServiceImpl implements WebSocketService {
 			// 减掉库存
 			volume = VolumeManager.getInstance().getSetVolume(config, volume);
 		}
+		*/
 		System.out.println("can hedging volume " + volume);
 		return volume;
 	}
@@ -282,9 +292,6 @@ public class StartHedgingServiceImpl implements WebSocketService {
 	 * 开仓条件
 	 * 
 	 * @param config
-	 * @param level2Buy
-	 * @param level2Sell
-	 * @param thresholdRate
 	 * @return
 	 */
 	private boolean openHedging(HedgingConfig config, TickerBean xianjia1, TickerBean xianjia2,
@@ -299,13 +306,12 @@ public class StartHedgingServiceImpl implements WebSocketService {
 		float dangji = xianjia2.getFloatLastPrice();
 		float dangzhou_index = jizhunjia1.getFloatIndexPrice();
 		float dangji_index = jizhunjia2.getFloatIndexPrice();
-		float atm_index = ((dangji - dangji_index) / dangji_index ) / ((dangzhou - dangzhou_index) / dangzhou_index);
-
 		//2.判断参数是否符合基础的数学条件
 		if((dangji - dangji_index) == 0f || (dangzhou - dangji_index) == 0f || dangji_index == 0f || dangzhou_index == 0f){
 			return false;
 		}
 
+		float atm_index = AtmHelp.computerAtm(dangji,dangji_index,dangzhou,dangzhou_index);
 		//3. 初始化上一次奥特曼指数
 		if(lastAtmIn.get("lastatm") == null){
 			lastAtmIn.put("lastatm",atm_index);
@@ -328,6 +334,7 @@ public class StartHedgingServiceImpl implements WebSocketService {
 			if (config.isStart() && atm_index <= atm_index_config && Math.abs(dangji_f - dangzhou_f) > djz_diff_config) {
 				if(atm_index - lastatm >= config.getAtmDiff()) { //上升
 					lastAtmIn.put("lastatm",atm_index);
+					isOpening = true;
 					return true;
 				}
 			}

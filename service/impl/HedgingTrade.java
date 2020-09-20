@@ -27,6 +27,8 @@ public class HedgingTrade implements Serializable{
 	private String type;//1 买入，2 卖出，3 平买，4平卖
 	private String orderId;////对应的交易所交易订单编号
 	private long addTime;
+	private float atm_index;
+
 	public HedgingTrade()
 	{
 		addTime=System.currentTimeMillis();
@@ -38,6 +40,14 @@ public class HedgingTrade implements Serializable{
 
 	public void setAddTime(long addTime) {
 		this.addTime = addTime;
+	}
+
+	public float getAtm_index() {
+		return atm_index;
+	}
+
+	public void setAtm_index(float atm_index) {
+		this.atm_index = atm_index;
 	}
 
 	public long getDeliveryTime() {
