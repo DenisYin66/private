@@ -230,6 +230,7 @@ public class StartHedgingServiceImpl implements WebSocketService {
 			sellTrade.setDeliveryTime(futureInstrument.getDeliveryTime());
 			sellTrade.setPrice(level2Sell.getFloatPrice() * (1 - premiumRate / 100f));
 			sellTrade.setAmount(sellVolume);
+			sellTrade.setAtm_index(atm_index);
 			if ("1".equals(type)) {
 				sellTrade.setType("2");
 			} else {
@@ -287,6 +288,17 @@ public class StartHedgingServiceImpl implements WebSocketService {
 		return volume;
 	}
 
+	private boolean isIndexUpdate(int second){
+		Calendar cal2 = Calendar.getInstance();
+		long currentTime = cal2.getTime().getTime();
+		//处理5分钟基准价格
+		long fivemin = 10 * 60 *1000;
+		if((currentTime%fivemin) <= second*1000 ){
+			return false;
+		}
+		return true;
+	}
+
 	/**
 	 * 判断是否符合
 	 * 开仓条件
@@ -296,6 +308,11 @@ public class StartHedgingServiceImpl implements WebSocketService {
 	 */
 	private boolean openHedging(HedgingConfig config, TickerBean xianjia1, TickerBean xianjia2,
 								TickerBean jizhunjia1,TickerBean jizhunjia2) {
+		//增加基准价更新前后30秒不能交易
+		if(!isIndexUpdate(15)){
+			System.out.println("基准价更新15秒之内，不交易");
+			return false;
+		}
 		//1.判断参数是否初始化
 		if(xianjia1 == null || xianjia2 == null || jizhunjia1 == null || jizhunjia2 == null){
 			return false;
